@@ -1,4 +1,5 @@
-import { getDayOfWeekData, getStockList } from "@/lib/real-data";
+import { getStockList } from "@/lib/real-data";
+import { getSeasonalityData } from "@/lib/data-service";
 import CalendarView from "@/components/CalendarView";
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ ticker?: string }> }) {
@@ -6,7 +7,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const selectedTicker = (ticker || "SPY").toUpperCase();
   
   const [data, stocks] = await Promise.all([
-    getDayOfWeekData(selectedTicker),
+    getSeasonalityData(selectedTicker),
     getStockList()
   ]);
 

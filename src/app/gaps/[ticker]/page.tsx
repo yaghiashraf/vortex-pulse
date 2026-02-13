@@ -1,4 +1,5 @@
-import { getGapFillData, getStockMeta, getStockList } from "@/lib/real-data";
+import { getStockMeta, getStockList } from "@/lib/real-data";
+import { getGapData } from "@/lib/data-service";
 import GapFillView from "@/components/GapFillView";
 
 export default async function GapFillPage({ params }: { params: Promise<{ ticker: string }> }) {
@@ -6,7 +7,7 @@ export default async function GapFillPage({ params }: { params: Promise<{ ticker
   const upperTicker = ticker.toUpperCase();
   
   const [data, stock, stocks] = await Promise.all([
-    getGapFillData(upperTicker),
+    getGapData(upperTicker),
     getStockMeta(upperTicker),
     getStockList()
   ]);

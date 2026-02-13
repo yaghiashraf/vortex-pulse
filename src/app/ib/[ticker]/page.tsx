@@ -1,4 +1,5 @@
-import { getIBData, getStockMeta, getStockList } from "@/lib/real-data";
+import { getStockMeta, getStockList } from "@/lib/real-data";
+import { getIBStats } from "@/lib/data-service";
 import TickerSearch from "@/components/TickerSearch";
 import StatCard from "@/components/StatCard";
 
@@ -7,7 +8,7 @@ export default async function IBPage({ params }: { params: Promise<{ ticker: str
   const upperTicker = ticker.toUpperCase();
   
   const [ib, stock, stocks] = await Promise.all([
-    getIBData(upperTicker),
+    getIBStats(upperTicker),
     getStockMeta(upperTicker),
     getStockList()
   ]);
