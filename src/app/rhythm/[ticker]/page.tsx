@@ -1,14 +1,15 @@
-"use client";
-
-import { use } from "react";
-import { getSessionPhases, getStockMeta } from "@/lib/mock-data";
+import { getSessionPhases, getStockMeta, getStockList } from "@/lib/real-data";
 import TickerSearch from "@/components/TickerSearch";
 
-export default function RhythmPage({ params }: { params: Promise<{ ticker: string }> }) {
-  const { ticker } = use(params);
+export default async function RhythmPage({ params }: { params: Promise<{ ticker: string }> }) {
+  const { ticker } = await params;
   const upperTicker = ticker.toUpperCase();
-  const phases = getSessionPhases(upperTicker);
-  const stock = getStockMeta(upperTicker);
+  
+  const [phases, stock, stocks] = await Promise.all([
+    getSessionPhases(upperTicker),
+    getStockMeta(upperTicker),
+    getStockList()
+  ]);
 
   const bestPhase = phases.reduce((best, p) => (p.trendProb > best.trendProb ? p : best), phases[0]);
 
@@ -23,7 +24,7 @@ export default function RhythmPage({ params }: { params: Promise<{ ticker: strin
             {stock && <span> — {stock.name}</span>}
           </p>
         </div>
-        <TickerSearch currentTicker={upperTicker} basePath="/rhythm" />
+        <TickerSearch currentTicker={upperTicker} basePath="/rhythm" stocks={stocks} />
       </div>
 
       {/* Timeline Visualization */}

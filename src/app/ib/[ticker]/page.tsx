@@ -1,15 +1,16 @@
-"use client";
-
-import { use } from "react";
-import { getIBData, getStockMeta } from "@/lib/mock-data";
+import { getIBData, getStockMeta, getStockList } from "@/lib/real-data";
 import TickerSearch from "@/components/TickerSearch";
 import StatCard from "@/components/StatCard";
 
-export default function IBPage({ params }: { params: Promise<{ ticker: string }> }) {
-  const { ticker } = use(params);
+export default async function IBPage({ params }: { params: Promise<{ ticker: string }> }) {
+  const { ticker } = await params;
   const upperTicker = ticker.toUpperCase();
-  const ib = getIBData(upperTicker);
-  const stock = getStockMeta(upperTicker);
+  
+  const [ib, stock, stocks] = await Promise.all([
+    getIBData(upperTicker),
+    getStockMeta(upperTicker),
+    getStockList()
+  ]);
 
   const dominantDirection =
     ib.ibBreakUpProb > ib.ibBreakDownProb ? "upside" : "downside";
@@ -27,7 +28,7 @@ export default function IBPage({ params }: { params: Promise<{ ticker: string }>
             {stock && <span> — {stock.name}</span>}
           </p>
         </div>
-        <TickerSearch currentTicker={upperTicker} basePath="/ib" />
+        <TickerSearch currentTicker={upperTicker} basePath="/ib" stocks={stocks} />
       </div>
 
       {/* Summary Stats */}
@@ -52,7 +53,7 @@ export default function IBPage({ params }: { params: Promise<{ ticker: string }>
         />
         <StatCard
           label="Sample Size"
-          value={ib.sampleSize}
+          value={ib.sampleSize.toString()}
           subValue="trading days analyzed"
           color="blue"
         />
@@ -204,7 +205,7 @@ export default function IBPage({ params }: { params: Promise<{ ticker: string }>
               Extension Ratio
             </div>
             <div className="text-xl font-bold font-mono text-vortex-purple">
-              {(ib.avgUpExtension / ib.avgIBRange).toFixed(1)}x / {(ib.avgDownExtension / ib.avgIBRange).toFixed(1)}x
+              {(ib.avgUpExtension / (ib.avgIBRange || 1)).toFixed(1)}x / {(ib.avgDownExtension / (ib.avgIBRange || 1)).toFixed(1)}x
             </div>
             <div className="text-[10px] text-vortex-muted">up ext / down ext vs IB range</div>
           </div>

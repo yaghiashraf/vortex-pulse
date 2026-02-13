@@ -2,19 +2,19 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getStockList } from "@/lib/mock-data";
+import { StockMeta } from "@/lib/types";
 
 interface TickerSearchProps {
   currentTicker?: string;
   basePath: string;
+  stocks: StockMeta[];
 }
 
-export default function TickerSearch({ currentTicker, basePath }: TickerSearchProps) {
+export default function TickerSearch({ currentTicker, basePath, stocks }: TickerSearchProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const stocks = getStockList();
 
   const filtered = query
     ? stocks.filter(
