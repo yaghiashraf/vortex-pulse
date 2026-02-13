@@ -104,11 +104,11 @@ export async function getStockMeta(ticker: string): Promise<StockMeta | undefine
 
 export async function getTimeOfDayData(ticker: string): Promise<TimeSlot[]> {
   try {
-    // Get 5 days of 5m data to build a profile
+    // Get 5 days of 1m data to build a profile
     // Note: yahoo-finance2 chart '1d' range might be today. '5d' gives last 5 days.
     const period1 = new Date();
     period1.setDate(period1.getDate() - 5);
-    const result = await yf.chart(ticker, { interval: '5m', period1: period1 });
+    const result = await yf.chart(ticker, { interval: '1m', period1: period1 });
     if (!result || !result.quotes) return [];
 
     const quotes = result.quotes;
@@ -117,10 +117,8 @@ export async function getTimeOfDayData(ticker: string): Promise<TimeSlot[]> {
 
     TIME_SLOTS.forEach(t => slotsMap.set(t, { vol: [], rangePct: [], return: [] }));
 
-    // Group 5m candles into 30m buckets
-    // We need to sum 5m volumes into 30m volumes for each day, then average across days.
-    // For range/volatility, we can average the 5m range% or calc 30m range. 
-    // To be precise: Let's treat the 5m candles as samples of "activity at this time".
+    // Group 1m candles into 30m buckets
+    // We need to sum 1m volumes into 30m volumes for each day, then average across days.
     
     quotes.forEach((q: any) => {
       if (!q.date) return;
@@ -128,20 +126,21 @@ export async function getTimeOfDayData(ticker: string): Promise<TimeSlot[]> {
       const [h, m] = timeStr.split(':').map(Number);
       
       // 9:30 - 10:00 -> 09:30 bucket
+      // Logic: floor minutes to 00 or 30
       const slotM = m >= 30 ? 30 : 0;
       const slotTime = `${String(h).padStart(2, '0')}:${String(slotM).padStart(2, '0')}`;
       
       if (slotsMap.has(slotTime)) {
         const bucket = slotsMap.get(slotTime)!;
         
-        // 5m Volume
+        // 1m Volume
         bucket.vol.push(q.volume);
         
-        // 5m Volatility (High-Low as % of Open) - "Activity"
+        // 1m Volatility (High-Low as % of Open) - "Activity"
         const volPct = ((q.high - q.low) / q.open) * 100;
         bucket.rangePct.push(volPct);
         
-        // 5m Return %
+        // 1m Return %
         const retPct = ((q.close - q.open) / q.open);
         bucket.return.push(retPct);
       }
@@ -164,36 +163,28 @@ export async function getTimeOfDayData(ticker: string): Promise<TimeSlot[]> {
       }
 
       // To get "Average 30m Volume", we need to know how many days we have.
-      // Since we just dumped all 5m candles into one bucket, we have (Days * 6) candles roughly.
-      // So TotalVolume / (Count / 6) is approx Avg 30m Volume.
-      const estimatedDays = Math.max(1, Math.round(count / 6));
+      // We have (Days * 30) candles roughly (1m interval).
+      const estimatedDays = Math.max(1, Math.round(count / 30));
       
       const totalVol = bucket!.vol.reduce((a, b) => a + b, 0);
       const avgVolume = Math.round(totalVol / estimatedDays);
 
-      // Average 5m Range % (proxy for volatility intensity)
+      // Average 1m Range % (proxy for volatility intensity)
       const avgVolPct = bucket!.rangePct.reduce((a, b) => a + b, 0) / count;
       
-      // Avg Return % (sum of 5m returns... for 30m return we should sum them per day, but average of sums = sum of averages)
-      // Actually average 5m return * 6 = average 30m return roughly
-      const avg5mReturn = bucket!.return.reduce((a, b) => a + b, 0) / count;
-      const avgReturn = parseFloat((avg5mReturn * 6).toFixed(4)); // Scaled to 30m
+      // Avg Return % (sum of 1m returns... scaled to 30m)
+      // average 1m return * 30 = average 30m return roughly
+      const avg1mReturn = bucket!.return.reduce((a, b) => a + b, 0) / count;
+      const avgReturn = parseFloat((avg1mReturn * 30).toFixed(4)); // Scaled to 30m
 
-      // Trend Probability: % of 5m candles that were Green
-      // This measures "sustained momentum" within the window
+      // Trend Probability: % of 1m candles that were Green
+      // With 1m candles, this is a much smoother "momentum" indicator.
       const positiveCandles = bucket!.return.filter(r => r > 0).length;
       const trendProb = parseFloat((positiveCandles / count).toFixed(2));
 
-      // Avg Range in Dollars (approximate using last price or just return 0 if not easily available)
-      // We can use the avgVolPct * currentPrice, but we don't have currentPrice easily here without another lookup or passing it.
-      // Let's use a heuristic or just leave it as % for now, OR fetch quote.
-      // For the UI "Avg Range $", let's use the % * 100 for now as the UI expects a number, but labeling it % might be better.
-      // Actually, the UI displays "$X.XX". Let's try to infer price from the first candle?
-      // Better: we can just calculate avg dollar range from the 5m candles.
-      // But user wants "Avg Range" of the 30m bar.
-      // Simplifying: Avg Range = Avg 5m Range * sqrt(6)? Or just sum?
-      // Let's just use the average dollar range of the 5m candles * 3 (heuristic for 30m high-low).
-      const avgRange = parseFloat((avgVolPct * 2).toFixed(2)); // Rough placeholder for dollar range
+      // Avg Range in Dollars 
+      // Heuristic: Avg 1m Range * sqrt(30) or roughly * 5 for 30m high-low
+      const avgRange = parseFloat((avgVolPct * 5).toFixed(2)); 
 
       return {
         time,
