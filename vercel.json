@@ -1,8 +1,36 @@
 {
   "crons": [
     {
-      "path": "/api/sync-cron",
+      "path": "/api/sync-cron?batch=0",
       "schedule": "0 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=1",
+      "schedule": "5 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=2",
+      "schedule": "10 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=3",
+      "schedule": "15 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=4",
+      "schedule": "20 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=5",
+      "schedule": "25 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=6",
+      "schedule": "30 22 * * 1-5"
+    },
+    {
+      "path": "/api/sync-cron?batch=7",
+      "schedule": "35 22 * * 1-5"
     }
   ]
 }
