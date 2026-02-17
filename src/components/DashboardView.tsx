@@ -3,7 +3,8 @@
 import Link from "next/link";
 import StatCard from "@/components/StatCard";
 import RecentTickers from "@/components/RecentTickers";
-import { MarketRegime, StockMeta } from "@/lib/types";
+import DashboardWindows from "@/components/DashboardWindows";
+import { MarketRegime, StockMeta, IndexSnapshot } from "@/lib/types";
 
 const FEATURES = [
   {
@@ -32,17 +33,11 @@ const FEATURES = [
 interface DashboardViewProps {
   regime: MarketRegime;
   stocks: StockMeta[];
-  optimalWindows: { ticker: string; windows: { start: string; end: string; score: number }[] }[];
+  indexData: IndexSnapshot[];
   renderedAt: string;
 }
 
-export default function DashboardView({ regime, stocks, optimalWindows, renderedAt }: DashboardViewProps) {
-  const regimeColor = {
-    trending: "green" as const,
-    ranging: "amber" as const,
-    volatile: "red" as const,
-  };
-
+export default function DashboardView({ regime, stocks, indexData, renderedAt }: DashboardViewProps) {
   const regimeLabel = {
     trending: "TRENDING",
     ranging: "RANGING",
@@ -117,16 +112,49 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
 
         <p className="text-sm text-vortex-text mb-4">{regime.description}</p>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <StatCard label="VIX" value={regime.vixLevel.toFixed(2)} color={regime.vixLevel > 25 ? "red" : regime.vixLevel > 18 ? "amber" : "green"} />
           <StatCard label="VIX Trend" value={regime.vixTrend.toUpperCase()} color={regime.vixTrend === "falling" ? "green" : regime.vixTrend === "rising" ? "red" : "amber"} />
           <StatCard label="Breadth" value={`${regime.breadthScore}%`} color={regime.breadthScore > 55 ? "green" : regime.breadthScore > 40 ? "amber" : "red"} />
           <StatCard label="Trend W/R" value={`${(regime.trendWinRate * 100).toFixed(0)}%`} color="blue" subValue="trend following" />
           <StatCard label="MR W/R" value={`${(regime.meanReversionWinRate * 100).toFixed(0)}%`} color="purple" subValue="mean reversion" />
         </div>
+
+        {/* Index ETF Snapshots */}
+        {indexData.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {indexData.map((idx) => (
+              <Link
+                key={idx.ticker}
+                href={`/ticker/${idx.ticker}`}
+                className="bg-vortex-surface border border-vortex-border rounded-lg p-3 hover:border-vortex-accent/40 transition-colors"
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="font-mono font-bold text-sm text-vortex-text-bright">
+                    {idx.ticker}
+                  </span>
+                  <span className="text-xs text-vortex-muted">·</span>
+                  <span className="text-xs text-vortex-muted truncate">{idx.name}</span>
+                </div>
+                <div className="font-mono text-lg font-semibold text-vortex-text-bright">
+                  ${idx.price.toFixed(2)}
+                </div>
+                <div
+                  className={`text-xs font-mono ${
+                    idx.change >= 0 ? "text-vortex-green" : "text-vortex-red"
+                  }`}
+                >
+                  {idx.change >= 0 ? "+" : ""}
+                  {idx.change.toFixed(2)} ({idx.changePercent >= 0 ? "+" : ""}
+                  {idx.changePercent.toFixed(2)}%)
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Today's Optimal Windows */}
+      {/* Today's Optimal Windows — user-customizable */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-semibold text-vortex-text-bright uppercase tracking-wider">
@@ -140,48 +168,7 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {optimalWindows.map(({ ticker, windows }) => (
-            <Link
-              key={ticker}
-              href={`/ticker/${ticker}`}
-              className="bg-vortex-card border border-vortex-border rounded-lg p-4 hover:border-vortex-accent/40 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono font-bold text-base text-vortex-text-bright">
-                  {ticker}
-                </span>
-                <span className="text-xs text-vortex-muted">
-                  {stocks.find((s) => s.ticker === ticker)?.name}
-                </span>
-              </div>
-              <div className="space-y-1.5">
-                {windows.map((w, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div
-                      className="h-1.5 rounded-full"
-                      style={{
-                        width: `${w.score * 100}%`,
-                        backgroundColor:
-                          i === 0
-                            ? "#22c55e"
-                            : i === 1
-                            ? "#3b82f6"
-                            : "#6b7280",
-                      }}
-                    />
-                    <span className="text-xs font-mono text-vortex-muted whitespace-nowrap">
-                      {w.start}-{w.end}
-                    </span>
-                    <span className="text-xs font-mono text-vortex-text">
-                      {(w.score * 100).toFixed(0)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Link>
-          ))}
-        </div>
+        <DashboardWindows />
       </div>
 
       {/* Feature Grid - reduced to 3 */}

@@ -7,6 +7,7 @@ import {
   IBStat,
   MarketRegime,
   StockMeta,
+  IndexSnapshot,
 } from "./types";
 
 // yahoo-finance2 v3 requires instantiation
@@ -656,7 +657,7 @@ export async function getDayOfWeekData(ticker: string): Promise<DayOfWeekStat[]>
 
     for (let i = 0; i < history.length; i++) {
       const day = history[i];
-      const d = day.date.getDay();
+      const d = new Date(day.date).getDay();
       if (d < 1 || d > 5) continue;
 
       const stats = daysStats.get(d)!;
@@ -930,4 +931,33 @@ export async function getOptimalWindows(tickers: string[]): Promise<{ ticker: st
     })
   );
   return results;
+}
+
+const INDEX_META: Record<string, string> = {
+  SPY: "S&P 500",
+  DIA: "Dow Jones",
+  QQQ: "Nasdaq 100",
+  IWM: "Russell 2000",
+};
+
+export async function getIndexSnapshot(): Promise<IndexSnapshot[]> {
+  const tickers = ["SPY", "DIA", "QQQ", "IWM"];
+  try {
+    const quotes = await Promise.all(tickers.map((t) => yf.quote(t)));
+    return quotes.map((q: any, i: number) => ({
+      ticker: tickers[i],
+      name: INDEX_META[tickers[i]],
+      price: q.regularMarketPrice ?? 0,
+      change: q.regularMarketChange ?? 0,
+      changePercent: q.regularMarketChangePercent ?? 0,
+    }));
+  } catch {
+    return tickers.map((t) => ({
+      ticker: t,
+      name: INDEX_META[t],
+      price: 0,
+      change: 0,
+      changePercent: 0,
+    }));
+  }
 }

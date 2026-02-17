@@ -1,15 +1,14 @@
-import { getMarketRegime, getOptimalWindows, getStockList } from "@/lib/real-data";
+import { getMarketRegime, getIndexSnapshot, getStockList } from "@/lib/real-data";
 import DashboardView from "@/components/DashboardView";
 
 export const revalidate = 60;
 
 export default async function Dashboard() {
-  const regime = await getMarketRegime();
-  const stocks = await getStockList();
-
-  // Get top movers for quick view
-  const topTickers = stocks.slice(0, 6).map((s) => s.ticker);
-  const optimalWindows = await getOptimalWindows(topTickers);
+  const [regime, stocks, indexData] = await Promise.all([
+    getMarketRegime(),
+    getStockList(),
+    getIndexSnapshot(),
+  ]);
 
   // Server-rendered timestamp in ET
   const renderedAt = new Date().toLocaleString('en-US', {
@@ -25,7 +24,7 @@ export default async function Dashboard() {
     <DashboardView
       regime={regime}
       stocks={stocks}
-      optimalWindows={optimalWindows}
+      indexData={indexData}
       renderedAt={renderedAt}
     />
   );

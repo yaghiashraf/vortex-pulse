@@ -75,3 +75,11 @@ export interface WatchlistItem {
   ticker: string;
   optimalWindows: { start: string; end: string; score: number }[];
 }
+
+export interface IndexSnapshot {
+  ticker: string;
+  name: string;
+  price: number;
+  change: number;
+  changePercent: number;
+}
