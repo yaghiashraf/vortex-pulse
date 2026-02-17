@@ -3,6 +3,8 @@ import { getIBStats } from "@/lib/data-service";
 import TickerSearch from "@/components/TickerSearch";
 import StatCard from "@/components/StatCard";
 
+export const revalidate = 300;
+
 export default async function IBPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
   const upperTicker = ticker.toUpperCase();

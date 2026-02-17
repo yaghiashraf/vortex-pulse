@@ -90,8 +90,10 @@ export async function GET(req: Request) {
   const CONCURRENCY = 5; 
 
   // We hit our own sync API to do the heavy lifting per ticker
-  const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL 
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
+  const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
       : 'http://localhost:3000';
 
   for (let i = 0; i < batch.length; i += CONCURRENCY) {

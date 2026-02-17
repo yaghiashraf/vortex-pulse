@@ -1,6 +1,8 @@
 import { getSessionPhases, getStockMeta, getStockList } from "@/lib/real-data";
 import TickerSearch from "@/components/TickerSearch";
 
+export const revalidate = 300;
+
 export default async function RhythmPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
   const upperTicker = ticker.toUpperCase();

@@ -2,6 +2,8 @@ import { getTimeOfDayData, getStockMeta, getStockList } from "@/lib/real-data";
 import TickerSearch from "@/components/TickerSearch";
 import StatCard from "@/components/StatCard";
 
+export const revalidate = 60;
+
 function getHeatColor(value: number, max: number): string {
   const ratio = value / max;
   if (ratio > 0.8) return "bg-blue-500";

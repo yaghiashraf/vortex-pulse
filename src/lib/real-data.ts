@@ -9,33 +9,8 @@ import {
   StockMeta,
 } from "./types";
 
-// Instantiate the library
-// @ts-ignore
-let yf: any;
-
-try {
-  // @ts-ignore
-  if (typeof yahooFinance === 'function') {
-     // @ts-ignore
-     yf = new yahooFinance({ suppressNotices: ['yahooSurvey'] });
-  } else if (typeof yahooFinance === 'object' && yahooFinance !== null) {
-      // @ts-ignore
-      if (yahooFinance.default && typeof yahooFinance.default === 'function') {
-           // @ts-ignore
-           yf = new yahooFinance.default({ suppressNotices: ['yahooSurvey'] });
-      } else {
-           // Assume it's a singleton or pre-instantiated
-           yf = yahooFinance;
-      }
-  } else {
-      console.warn("Could not instantiate yahoo-finance2, falling back to global/module");
-      yf = yahooFinance;
-  }
-} catch (e) {
-  console.error("Error instantiating yahoo-finance2:", e);
-  // Fallback to avoid crash during build if it's just a quirk
-  yf = yahooFinance; 
-}
+// yahoo-finance2 v3 requires instantiation
+const yf = new (yahooFinance as any)();
 
 const TIME_SLOTS = [
   "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -49,10 +24,105 @@ const TIME_LABELS = [
   "2:30-3:00", "3:00-3:30", "3:30-4:00",
 ];
 
-const POPULAR_STICKERS = [
+const POPULAR_TICKERS = [
   "AAPL", "TSLA", "NVDA", "AMD", "AMZN", "META", "MSFT", "GOOGL", "SPY", "QQQ",
   "NFLX", "JPM", "BA", "COIN", "PLTR", "SOFI", "SMCI", "ARM", "MARA", "RIVN"
 ];
+
+// Static sector map for known tickers (avoids extra API calls)
+const SECTOR_MAP: Record<string, string> = {
+  // Technology
+  AAPL: "Technology", MSFT: "Technology", NVDA: "Technology", AMD: "Technology",
+  GOOGL: "Technology", GOOG: "Technology", META: "Technology", CRM: "Technology",
+  ADBE: "Technology", INTC: "Technology", CSCO: "Technology", ORCL: "Technology",
+  QCOM: "Technology", TXN: "Technology", AVGO: "Technology", IBM: "Technology",
+  NOW: "Technology", AMAT: "Technology", MU: "Technology", ADI: "Technology",
+  LRCX: "Technology", KLAC: "Technology", SNPS: "Technology", CDNS: "Technology",
+  NXPI: "Technology", HPQ: "Technology", GLW: "Technology", MSI: "Technology",
+  HPE: "Technology", DELL: "Technology", ANET: "Technology", KEYS: "Technology",
+  FTNT: "Technology", NET: "Technology", PANW: "Technology", CRWD: "Technology",
+  ZS: "Technology", DDOG: "Technology", PLTR: "Technology", SNOW: "Technology",
+  ZM: "Technology", DOCU: "Technology", TWLO: "Technology", OKTA: "Technology",
+  MDB: "Technology", TEAM: "Technology", WDAY: "Technology", U: "Technology",
+  AI: "Technology", SMCI: "Technology", ARM: "Technology", CART: "Technology",
+  PATH: "Technology", IOT: "Technology", GTLB: "Technology",
+  // Consumer Discretionary
+  AMZN: "Consumer Discretionary", TSLA: "Consumer Discretionary", HD: "Consumer Discretionary",
+  MCD: "Consumer Discretionary", NKE: "Consumer Discretionary", SBUX: "Consumer Discretionary",
+  DIS: "Consumer Discretionary", TGT: "Consumer Discretionary", LOW: "Consumer Discretionary",
+  TJX: "Consumer Discretionary", BKNG: "Consumer Discretionary", MAR: "Consumer Discretionary",
+  HLT: "Consumer Discretionary", CMG: "Consumer Discretionary", YUM: "Consumer Discretionary",
+  LULU: "Consumer Discretionary", ROST: "Consumer Discretionary", BBY: "Consumer Discretionary",
+  EBAY: "Consumer Discretionary", ETSY: "Consumer Discretionary", ABNB: "Consumer Discretionary",
+  UBER: "Consumer Discretionary", LYFT: "Consumer Discretionary", DASH: "Consumer Discretionary",
+  RIVN: "Consumer Discretionary", LCID: "Consumer Discretionary", F: "Consumer Discretionary",
+  GM: "Consumer Discretionary", DKNG: "Consumer Discretionary", NFLX: "Consumer Discretionary",
+  // Consumer Staples
+  WMT: "Consumer Staples", COST: "Consumer Staples", PG: "Consumer Staples",
+  KO: "Consumer Staples", PEP: "Consumer Staples", PM: "Consumer Staples",
+  MO: "Consumer Staples", CL: "Consumer Staples", MNST: "Consumer Staples",
+  CELH: "Consumer Staples", KR: "Consumer Staples", DG: "Consumer Staples",
+  // Financials
+  JPM: "Financials", BAC: "Financials", V: "Financials", MA: "Financials",
+  GS: "Financials", MS: "Financials", WFC: "Financials", C: "Financials",
+  BLK: "Financials", SCHW: "Financials", AXP: "Financials", COF: "Financials",
+  SOFI: "Financials", HOOD: "Financials", COIN: "Financials", PYPL: "Financials",
+  AFRM: "Financials", UPST: "Financials",
+  // Healthcare
+  LLY: "Healthcare", JNJ: "Healthcare", UNH: "Healthcare", PFE: "Healthcare",
+  MRK: "Healthcare", ABBV: "Healthcare", TMO: "Healthcare", ABT: "Healthcare",
+  AMGN: "Healthcare", GILD: "Healthcare", ISRG: "Healthcare", MRNA: "Healthcare",
+  BNTX: "Healthcare", DXCM: "Healthcare",
+  // Industrials
+  CAT: "Industrials", BA: "Industrials", GE: "Industrials", UPS: "Industrials",
+  HON: "Industrials", DE: "Industrials", LMT: "Industrials", RTX: "Industrials",
+  FDX: "Industrials", DAL: "Industrials", UAL: "Industrials",
+  // Energy
+  XOM: "Energy", CVX: "Energy", COP: "Energy", SLB: "Energy", OXY: "Energy",
+  MPC: "Energy", PSX: "Energy", VLO: "Energy", HAL: "Energy",
+  // Materials
+  LIN: "Materials", SHW: "Materials", FCX: "Materials", NEM: "Materials",
+  APD: "Materials", DD: "Materials", DOW: "Materials", NUE: "Materials",
+  X: "Materials", AA: "Materials",
+  // Real Estate
+  PLD: "Real Estate", AMT: "Real Estate", CCI: "Real Estate", EQIX: "Real Estate",
+  O: "Real Estate", SPG: "Real Estate",
+  // Utilities
+  NEE: "Utilities", DUK: "Utilities", SO: "Utilities", AEP: "Utilities",
+  // Crypto-related
+  MARA: "Technology",
+  // ETFs
+  SPY: "ETF", QQQ: "ETF", IWM: "ETF", DIA: "ETF", TLT: "ETF",
+  GLD: "ETF", SLV: "ETF", XLE: "ETF", XLF: "ETF", XLK: "ETF",
+  XLV: "ETF", XLY: "ETF", XLP: "ETF", XLI: "ETF", SMH: "ETF",
+  SOXX: "ETF", ARKK: "ETF", TQQQ: "ETF", SQQQ: "ETF",
+};
+
+/** Calculate 14-period ATR from historical daily data */
+async function calcATR(ticker: string): Promise<number> {
+  try {
+    const period1 = new Date();
+    period1.setDate(period1.getDate() - 30); // fetch ~20 trading days
+    const history = await yf.historical(ticker, { period1, interval: '1d' });
+    if (!history || history.length < 2) return 0;
+
+    const trueRanges: number[] = [];
+    for (let i = 1; i < history.length; i++) {
+      const h = history[i].high;
+      const l = history[i].low;
+      const prevC = history[i - 1].close;
+      const tr = Math.max(h - l, Math.abs(h - prevC), Math.abs(l - prevC));
+      trueRanges.push(tr);
+    }
+
+    // Use last 14 periods (or all available if fewer)
+    const periods = Math.min(14, trueRanges.length);
+    const recentTR = trueRanges.slice(-periods);
+    return recentTR.reduce((sum, v) => sum + v, 0) / periods;
+  } catch {
+    return 0;
+  }
+}
 
 // Helper to format time to HH:mm in NY time
 function formatNYTime(date: Date): string {
@@ -71,13 +141,17 @@ function isMarketHours(timeStr: string): boolean {
 
 export async function getStockList(): Promise<StockMeta[]> {
   try {
-    const quotes = await yf.quote(POPULAR_STICKERS);
-    return quotes.map((q: any) => ({
+    const quotes = await yf.quote(POPULAR_TICKERS);
+    // Calculate ATR for all tickers in parallel
+    const atrValues = await Promise.all(
+      POPULAR_TICKERS.map(t => calcATR(t))
+    );
+    return quotes.map((q: any, i: number) => ({
       ticker: q.symbol,
       name: q.shortName || q.longName || q.symbol,
-      sector: "N/A", // quote doesn't always have sector, would need quoteSummary
+      sector: SECTOR_MAP[q.symbol] || "N/A",
       avgVolume: q.averageDailyVolume3Month || q.regularMarketVolume || 0,
-      avgATR: 0, // Need historical to calc, leaving 0 or calc later
+      avgATR: parseFloat(atrValues[i].toFixed(2)),
       price: q.regularMarketPrice || 0,
     }));
   } catch (e) {
@@ -88,13 +162,16 @@ export async function getStockList(): Promise<StockMeta[]> {
 
 export async function getStockMeta(ticker: string): Promise<StockMeta | undefined> {
   try {
-    const q = await yf.quote(ticker);
+    const [q, atr] = await Promise.all([
+      yf.quote(ticker),
+      calcATR(ticker),
+    ]);
     return {
       ticker: q.symbol,
       name: q.shortName || q.longName || q.symbol,
-      sector: "N/A",
+      sector: SECTOR_MAP[q.symbol] || "N/A",
       avgVolume: q.averageDailyVolume3Month || 0,
-      avgATR: 0,
+      avgATR: parseFloat(atr.toFixed(2)),
       price: q.regularMarketPrice || 0,
     };
   } catch (e) {
@@ -544,26 +621,76 @@ export async function getIBData(ticker: string): Promise<IBStat> {
 
 export async function getMarketRegime(): Promise<MarketRegime> {
   try {
-    const vix = await yf.quote('^VIX');
-    const spy = await yf.quote('SPY');
-    
-    // Simple logic
+    const [vix, spy, iwm] = await Promise.all([
+      yf.quote('^VIX'),
+      yf.quote('SPY'),
+      yf.quote('IWM'),
+    ]);
+
     const vixLevel = vix.regularMarketPrice || 15;
+    const vixChange = vix.regularMarketChangePercent || 0;
     let regime: "trending" | "ranging" | "volatile" = "ranging";
-    
+
     if (vixLevel > 20) regime = "volatile";
     else if (vixLevel < 13) regime = "trending";
-    
+
+    // Confidence: how far VIX is from the 13-20 boundaries (closer = less confident)
+    let confidence: number;
+    if (regime === "volatile") {
+      confidence = Math.min(0.95, 0.6 + (vixLevel - 20) * 0.03);
+    } else if (regime === "trending") {
+      confidence = Math.min(0.95, 0.6 + (13 - vixLevel) * 0.05);
+    } else {
+      // Ranging: confidence is lower near boundaries
+      const midpoint = 16.5;
+      const distFromMid = Math.abs(vixLevel - midpoint);
+      confidence = Math.max(0.4, 0.75 - distFromMid * 0.05);
+    }
+
+    // Breadth score: compare SPY vs IWM performance (broad participation)
+    const spyChange = spy.regularMarketChangePercent || 0;
+    const iwmChange = iwm.regularMarketChangePercent || 0;
+    // If both positive and close, breadth is high; divergence = lower breadth
+    const divergence = Math.abs(spyChange - iwmChange);
+    const bothPositive = spyChange > 0 && iwmChange > 0;
+    const breadthScore = Math.round(
+      bothPositive
+        ? Math.min(85, 70 - divergence * 5)
+        : Math.max(20, 50 - divergence * 5)
+    );
+
+    // Win rates based on regime
+    let trendWinRate: number;
+    let meanReversionWinRate: number;
+    if (regime === "trending") {
+      trendWinRate = 0.65;
+      meanReversionWinRate = 0.35;
+    } else if (regime === "volatile") {
+      trendWinRate = 0.40;
+      meanReversionWinRate = 0.45;
+    } else {
+      trendWinRate = 0.45;
+      meanReversionWinRate = 0.60;
+    }
+
+    // Description
+    const vixTrend = vixChange > 0.5 ? "rising" : vixChange < -0.5 ? "falling" : "stable";
+    const descriptions: Record<string, string> = {
+      trending: `VIX at ${vixLevel.toFixed(1)} signals low fear. Trend-following strategies favored. ${vixTrend === "rising" ? "Watch for regime shift as VIX rises." : "Calm conditions support directional moves."}`,
+      ranging: `VIX at ${vixLevel.toFixed(1)} indicates a neutral market. Mean reversion setups have edge. ${breadthScore > 55 ? "Broad participation supports selective trend plays." : "Narrow breadth — stick to large caps."}`,
+      volatile: `VIX at ${vixLevel.toFixed(1)} signals elevated fear. Reduce size, widen stops. ${vixTrend === "falling" ? "VIX declining — potential regime normalization ahead." : "Elevated volatility — focus on A+ setups only."}`,
+    };
+
     return {
       regime,
-      confidence: 0.75, // placeholder
+      confidence: parseFloat(confidence.toFixed(2)),
       vixLevel,
-      vixTrend: vix.regularMarketChangePercent! > 0 ? "rising" : "falling",
-      breadthScore: 60,
+      vixTrend: vixTrend as "rising" | "falling" | "stable",
+      breadthScore,
       atrPercentile: 50,
-      trendWinRate: 0.5,
-      meanReversionWinRate: 0.5,
-      description: `VIX is at ${vixLevel}. Market is ${regime}.`
+      trendWinRate,
+      meanReversionWinRate,
+      description: descriptions[regime],
     };
   } catch (e) {
     return {
@@ -581,19 +708,31 @@ export async function getMarketRegime(): Promise<MarketRegime> {
 }
 
 export async function getOptimalWindows(tickers: string[]): Promise<{ ticker: string; windows: { start: string; end: string; score: number }[] }[]> {
-    // Simplified: return random or calc from ToD
-    // Since this is heavy (N calls), we might just return placeholders for the list
-    // or limit to top 3 tickers
-    const sliced = tickers.slice(0, 3);
-    const results = [];
-    for (const t of sliced) {
-        const tod = await getTimeOfDayData(t);
-        // Find best slots
-        const sorted = tod.sort((a,b) => b.avgRange - a.avgRange).slice(0, 3);
-        results.push({
-            ticker: t,
-            windows: sorted.map(s => ({ start: s.time, end: "Unknown", score: 0.9 }))
-        });
-    }
+    // Process all tickers in parallel
+    const results = await Promise.all(
+        tickers.map(async (t) => {
+            const tod = await getTimeOfDayData(t);
+            if (tod.length === 0) return { ticker: t, windows: [] };
+
+            const maxRange = Math.max(...tod.map(s => s.avgRange)) || 1;
+            // Sort a copy to avoid mutating the original array
+            const sorted = [...tod].sort((a, b) => b.avgRange - a.avgRange).slice(0, 3);
+
+            return {
+                ticker: t,
+                windows: sorted.map(s => {
+                    const idx = TIME_SLOTS.indexOf(s.time);
+                    const end = idx >= 0 && idx < TIME_SLOTS.length - 1
+                        ? TIME_SLOTS[idx + 1]
+                        : "16:00";
+                    return {
+                        start: s.time,
+                        end,
+                        score: parseFloat((s.avgRange / maxRange).toFixed(2)),
+                    };
+                }),
+            };
+        })
+    );
     return results;
 }

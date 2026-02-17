@@ -2,6 +2,8 @@ import { getStockMeta, getStockList } from "@/lib/real-data";
 import { getGapData } from "@/lib/data-service";
 import GapFillView from "@/components/GapFillView";
 
+export const revalidate = 300;
+
 export default async function GapFillPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
   const upperTicker = ticker.toUpperCase();

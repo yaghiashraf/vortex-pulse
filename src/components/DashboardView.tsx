@@ -54,9 +54,10 @@ interface DashboardViewProps {
   regime: MarketRegime;
   stocks: StockMeta[];
   optimalWindows: { ticker: string; windows: { start: string; end: string; score: number }[] }[];
+  renderedAt: string;
 }
 
-export default function DashboardView({ regime, stocks, optimalWindows }: DashboardViewProps) {
+export default function DashboardView({ regime, stocks, optimalWindows, renderedAt }: DashboardViewProps) {
   const [showAll, setShowAll] = useState(false);
 
   const regimeColor = {
@@ -244,6 +245,13 @@ export default function DashboardView({ regime, stocks, optimalWindows }: Dashbo
             </button>
           )}
         </div>
+      </div>
+
+      {/* Data Freshness */}
+      <div className="mb-8 text-center">
+        <span className="text-[10px] text-vortex-muted font-mono">
+          Data as of {renderedAt}
+        </span>
       </div>
 
       {/* Product Ecosystem */}
