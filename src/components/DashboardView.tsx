@@ -2,43 +2,16 @@
 
 import Link from "next/link";
 import StatCard from "@/components/StatCard";
+import RecentTickers from "@/components/RecentTickers";
 import { MarketRegime, StockMeta } from "@/lib/types";
 
 const FEATURES = [
   {
-    title: "Time-of-Day Heatmaps",
-    description: "See when each stock moves. Historical volatility and volume mapped across the trading day.",
-    href: "/heatmap/SPY",
+    title: "Ticker Analysis",
+    description: "Heatmaps, session rhythm, IB stats, and day-of-week edge — all in one unified view.",
+    href: "/ticker/SPY",
     icon: "▦",
     color: "from-blue-500/20 to-blue-600/5",
-  },
-  {
-    title: "Gap Fill Calculator",
-    description: "Historical gap fill probabilities by size, direction, and day of week.",
-    href: "/gaps/SPY",
-    icon: "⇥",
-    color: "from-green-500/20 to-green-600/5",
-  },
-  {
-    title: "Session Rhythm",
-    description: "Opening drive, lunch chop, close auction — know which session phase suits your strategy.",
-    href: "/rhythm/SPY",
-    icon: "◫",
-    color: "from-purple-500/20 to-purple-600/5",
-  },
-  {
-    title: "Day-of-Week Edge",
-    description: "Statistical tendencies by day of week. Monday gaps, Friday positioning, and more.",
-    href: "/calendar",
-    icon: "▤",
-    color: "from-amber-500/20 to-amber-600/5",
-  },
-  {
-    title: "IB Statistics",
-    description: "Initial Balance break/hold rates, extension targets, and historical IB range data.",
-    href: "/ib/SPY",
-    icon: "⟛",
-    color: "from-cyan-500/20 to-cyan-600/5",
   },
   {
     title: "My Trading Plan",
@@ -46,6 +19,13 @@ const FEATURES = [
     href: "/plan",
     icon: "☰",
     color: "from-pink-500/20 to-pink-600/5",
+  },
+  {
+    title: "How It Works",
+    description: "VortexPulse analyzes real market data to surface statistical edges across time, session, and day.",
+    href: "/ticker/SPY",
+    icon: "◉",
+    color: "from-cyan-500/20 to-cyan-600/5",
   },
 ];
 
@@ -72,14 +52,26 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-vortex-text-bright mb-2">
+      <div className="mb-4">
+        <h1 className="text-4xl font-bold text-vortex-text-bright mb-2">
           Know when the edge is in your favor.
         </h1>
-        <p className="text-sm text-vortex-muted max-w-2xl">
+        <p className="text-base text-vortex-muted max-w-2xl">
           VortexPulse uses real-time statistical analysis to help day traders identify optimal
-          trading windows, gap fill probabilities, and session rhythm patterns.
+          trading windows, session rhythm patterns, and IB break probabilities.
         </p>
+      </div>
+
+      {/* Data Freshness - moved up */}
+      <div className="mb-8">
+        <span className="text-xs text-vortex-muted font-mono">
+          Data as of {renderedAt}
+        </span>
+      </div>
+
+      {/* Recently Viewed */}
+      <div className="mb-8">
+        <RecentTickers />
       </div>
 
       {/* Market Regime Banner */}
@@ -96,12 +88,12 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
                     : "bg-vortex-red"
                 }`}
               />
-              <span className="text-xs uppercase tracking-wider text-vortex-muted">
+              <span className="text-sm uppercase tracking-wider text-vortex-muted">
                 Market Regime
               </span>
             </div>
             <span
-              className={`text-sm font-bold font-mono ${
+              className={`text-base font-bold font-mono ${
                 regime.regime === "trending"
                   ? "text-vortex-green"
                   : regime.regime === "ranging"
@@ -111,19 +103,19 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
             >
               {regimeLabel[regime.regime]}
             </span>
-            <span className="text-[10px] text-vortex-muted">
+            <span className="text-xs text-vortex-muted">
               ({(regime.confidence * 100).toFixed(0)}% confidence)
             </span>
           </div>
           <Link
-            href="/rhythm/SPY"
-            className="text-[10px] text-vortex-accent hover:text-vortex-accent-bright transition-colors uppercase tracking-wider"
+            href="/ticker/SPY"
+            className="text-xs text-vortex-accent hover:text-vortex-accent-bright transition-colors uppercase tracking-wider"
           >
             Full Analysis →
           </Link>
         </div>
 
-        <p className="text-xs text-vortex-text mb-4">{regime.description}</p>
+        <p className="text-sm text-vortex-text mb-4">{regime.description}</p>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <StatCard label="VIX" value={regime.vixLevel.toFixed(2)} color={regime.vixLevel > 25 ? "red" : regime.vixLevel > 18 ? "amber" : "green"} />
@@ -137,12 +129,12 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
       {/* Today's Optimal Windows */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-vortex-text-bright uppercase tracking-wider">
+          <h2 className="text-base font-semibold text-vortex-text-bright uppercase tracking-wider">
             Top Trading Windows Today
           </h2>
           <Link
             href="/plan"
-            className="text-[10px] text-vortex-accent hover:text-vortex-accent-bright transition-colors uppercase tracking-wider"
+            className="text-xs text-vortex-accent hover:text-vortex-accent-bright transition-colors uppercase tracking-wider"
           >
             Customize →
           </Link>
@@ -152,14 +144,14 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
           {optimalWindows.map(({ ticker, windows }) => (
             <Link
               key={ticker}
-              href={`/heatmap/${ticker}`}
+              href={`/ticker/${ticker}`}
               className="bg-vortex-card border border-vortex-border rounded-lg p-4 hover:border-vortex-accent/40 transition-colors"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono font-bold text-sm text-vortex-text-bright">
+                <span className="font-mono font-bold text-base text-vortex-text-bright">
                   {ticker}
                 </span>
-                <span className="text-[10px] text-vortex-muted">
+                <span className="text-xs text-vortex-muted">
                   {stocks.find((s) => s.ticker === ticker)?.name}
                 </span>
               </div>
@@ -178,10 +170,10 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
                             : "#6b7280",
                       }}
                     />
-                    <span className="text-[10px] font-mono text-vortex-muted whitespace-nowrap">
+                    <span className="text-xs font-mono text-vortex-muted whitespace-nowrap">
                       {w.start}-{w.end}
                     </span>
-                    <span className="text-[10px] font-mono text-vortex-text">
+                    <span className="text-xs font-mono text-vortex-text">
                       {(w.score * 100).toFixed(0)}
                     </span>
                   </div>
@@ -192,25 +184,25 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
         </div>
       </div>
 
-      {/* Feature Grid */}
+      {/* Feature Grid - reduced to 3 */}
       <div className="mb-8">
-        <h2 className="text-sm font-semibold text-vortex-text-bright uppercase tracking-wider mb-4">
+        <h2 className="text-base font-semibold text-vortex-text-bright uppercase tracking-wider mb-4">
           Tools
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {FEATURES.map((feature) => (
             <Link
-              key={feature.href}
+              key={feature.title}
               href={feature.href}
               className="group bg-vortex-card border border-vortex-border rounded-xl p-5 hover:border-vortex-accent/40 transition-all"
             >
               <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center text-lg mb-3`}>
                 {feature.icon}
               </div>
-              <h3 className="text-sm font-semibold text-vortex-text-bright mb-1 group-hover:text-vortex-accent-bright transition-colors">
+              <h3 className="text-base font-semibold text-vortex-text-bright mb-1 group-hover:text-vortex-accent-bright transition-colors">
                 {feature.title}
               </h3>
-              <p className="text-xs text-vortex-muted leading-relaxed">
+              <p className="text-sm text-vortex-muted leading-relaxed">
                 {feature.description}
               </p>
             </Link>
@@ -218,26 +210,19 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
         </div>
       </div>
 
-      {/* Data Freshness */}
-      <div className="mb-8 text-center">
-        <span className="text-[10px] text-vortex-muted font-mono">
-          Data as of {renderedAt}
-        </span>
-      </div>
-
       {/* Product Ecosystem */}
       <div className="border-t border-vortex-border pt-8">
-        <h2 className="text-sm font-semibold text-vortex-text-bright uppercase tracking-wider mb-4">
+        <h2 className="text-base font-semibold text-vortex-text-bright uppercase tracking-wider mb-4">
           Vortex Capital Group Ecosystem
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-5">
             <div className="text-xs text-blue-400 uppercase tracking-wider mb-1">Step 1 — When</div>
-            <h3 className="text-sm font-bold text-vortex-text-bright mb-1">VortexPulse</h3>
-            <p className="text-xs text-vortex-muted mb-3">
+            <h3 className="text-base font-bold text-vortex-text-bright mb-1">VortexPulse</h3>
+            <p className="text-sm text-vortex-muted mb-3">
               Statistical timing intelligence. Know when the edge is in your favor.
             </p>
-            <span className="text-[10px] text-blue-400 font-mono">vortexpulse.app</span>
+            <span className="text-xs text-blue-400 font-mono">vortexpulse.app</span>
           </div>
           <a
             href="https://vortexedge.tech"
@@ -246,11 +231,11 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
             className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-5 hover:border-green-500/40 transition-colors"
           >
             <div className="text-xs text-green-400 uppercase tracking-wider mb-1">Step 2 — What</div>
-            <h3 className="text-sm font-bold text-vortex-text-bright mb-1">VortexEdge</h3>
-            <p className="text-xs text-vortex-muted mb-3">
+            <h3 className="text-base font-bold text-vortex-text-bright mb-1">VortexEdge</h3>
+            <p className="text-sm text-vortex-muted mb-3">
               Market intelligence terminal. Pattern recognition & quantitative screening.
             </p>
-            <span className="text-[10px] text-green-400 font-mono">vortexedge.tech</span>
+            <span className="text-xs text-green-400 font-mono">vortexedge.tech</span>
           </a>
           <a
             href="https://vortexflow.app"
@@ -259,11 +244,11 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
             className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 rounded-xl p-5 hover:border-cyan-500/40 transition-colors"
           >
             <div className="text-xs text-cyan-400 uppercase tracking-wider mb-1">Step 3 — How</div>
-            <h3 className="text-sm font-bold text-vortex-text-bright mb-1">VortexFlow</h3>
-            <p className="text-xs text-vortex-muted mb-3">
+            <h3 className="text-base font-bold text-vortex-text-bright mb-1">VortexFlow</h3>
+            <p className="text-sm text-vortex-muted mb-3">
               Order flow visualization. Real-time price ladder, CVD, and large trade alerts.
             </p>
-            <span className="text-[10px] text-cyan-400 font-mono">vortexflow.app</span>
+            <span className="text-xs text-cyan-400 font-mono">vortexflow.app</span>
           </a>
         </div>
       </div>

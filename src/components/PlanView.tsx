@@ -45,8 +45,7 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
         if (mounted) setLoading(false);
       }
     };
-    
-    // Debounce or just call? For now call.
+
     if (watchlist.length > 0) {
         loadData();
     } else {
@@ -94,15 +93,15 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-vortex-text-bright mb-1">My Trading Plan</h1>
-        <p className="text-xs text-vortex-muted">
+        <h1 className="text-2xl font-bold text-vortex-text-bright mb-1">My Trading Plan</h1>
+        <p className="text-sm text-vortex-muted">
           Personalized optimal trading schedule based on your watchlist
         </p>
       </div>
 
       {/* Watchlist Builder */}
       <div className="bg-vortex-card border border-vortex-border rounded-xl p-5 mb-6">
-        <h2 className="text-xs uppercase tracking-wider text-vortex-muted mb-3">
+        <h2 className="text-sm uppercase tracking-wider text-vortex-muted mb-3">
           Your Watchlist
         </h2>
 
@@ -112,7 +111,7 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
             <button
               key={preset.name}
               onClick={() => setWatchlist(preset.tickers)}
-              className="px-3 py-1 rounded-md text-[10px] font-medium bg-vortex-surface border border-vortex-border text-vortex-muted hover:text-vortex-text hover:border-vortex-accent/40 transition-colors"
+              className="px-3 py-1 rounded-md text-xs font-medium bg-vortex-surface border border-vortex-border text-vortex-muted hover:text-vortex-text hover:border-vortex-accent/40 transition-colors"
             >
               {preset.name}
             </button>
@@ -124,7 +123,7 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
           {watchlist.map((ticker) => (
             <span
               key={ticker}
-              className="inline-flex items-center gap-1.5 bg-vortex-accent/10 border border-vortex-accent/30 rounded-md px-2.5 py-1 text-xs font-mono"
+              className="inline-flex items-center gap-1.5 bg-vortex-accent/10 border border-vortex-accent/30 rounded-md px-2.5 py-1 text-sm font-mono"
             >
               <span className="text-vortex-accent-bright">{ticker}</span>
               <button
@@ -145,11 +144,11 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
             onChange={(e) => setInputTicker(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTicker(inputTicker)}
             placeholder="Add ticker (e.g., AAPL)"
-            className="bg-vortex-surface border border-vortex-border rounded-md px-3 py-1.5 text-xs text-vortex-text placeholder-vortex-muted focus:outline-none focus:border-vortex-accent w-48 font-mono"
+            className="bg-vortex-surface border border-vortex-border rounded-md px-3 py-1.5 text-sm text-vortex-text placeholder-vortex-muted focus:outline-none focus:border-vortex-accent w-48 font-mono"
           />
           <button
             onClick={() => addTicker(inputTicker)}
-            className="px-4 py-1.5 bg-vortex-accent rounded-md text-xs font-medium text-white hover:bg-vortex-accent-bright transition-colors"
+            className="px-4 py-1.5 bg-vortex-accent rounded-md text-sm font-medium text-white hover:bg-vortex-accent-bright transition-colors"
           >
             Add
           </button>
@@ -168,11 +167,11 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
                 : "bg-vortex-red"
             }`}
           />
-          <h2 className="text-xs uppercase tracking-wider text-vortex-muted">
+          <h2 className="text-sm uppercase tracking-wider text-vortex-muted">
             Today&apos;s Market Context
           </h2>
           <span
-            className={`text-xs font-bold font-mono ${
+            className={`text-sm font-bold font-mono ${
               regime.regime === "trending"
                 ? "text-vortex-green"
                 : regime.regime === "ranging"
@@ -183,8 +182,8 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
             {regime.regime.toUpperCase()}
           </span>
         </div>
-        <p className="text-xs text-vortex-text mb-2">{regime.description}</p>
-        <div className="flex gap-4 text-[10px]">
+        <p className="text-sm text-vortex-text mb-2">{regime.description}</p>
+        <div className="flex gap-4 text-xs">
           <span className="text-vortex-muted">
             VIX: <span className="text-vortex-text font-mono">{regime.vixLevel.toFixed(2)}</span>
           </span>
@@ -206,21 +205,21 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
       {/* Optimal Trading Schedule */}
       <div className="bg-vortex-card border border-vortex-border rounded-xl p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs uppercase tracking-wider text-vortex-muted">
+            <h2 className="text-sm uppercase tracking-wider text-vortex-muted">
                 Your Optimal Trading Schedule
             </h2>
-            {loading && <span className="text-xs text-vortex-accent animate-pulse">Updating analysis...</span>}
+            {loading && <span className="text-sm text-vortex-accent animate-pulse">Updating analysis...</span>}
         </div>
 
         {watchlist.length === 0 ? (
-          <p className="text-xs text-vortex-muted py-8 text-center">
+          <p className="text-sm text-vortex-muted py-8 text-center">
             Add tickers to your watchlist to see your personalized schedule
           </p>
         ) : (
           <>
             {/* Top Windows */}
             <div className="mb-6">
-              <div className="text-[10px] text-vortex-muted mb-2 uppercase tracking-wider">
+              <div className="text-xs text-vortex-muted mb-2 uppercase tracking-wider">
                 Priority Windows (most overlap)
               </div>
               <div className="space-y-2">
@@ -234,18 +233,18 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
                     }`}
                   >
                     <div className="w-8 h-8 rounded-full bg-vortex-bg flex items-center justify-center">
-                      <span className="text-xs font-bold text-vortex-text-bright">#{i + 1}</span>
+                      <span className="text-sm font-bold text-vortex-text-bright">#{i + 1}</span>
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-mono font-bold text-vortex-text-bright">
+                      <div className="text-base font-mono font-bold text-vortex-text-bright">
                         {w.time}
                       </div>
                       <div className="flex gap-1.5 mt-0.5">
                         {w.tickers.map((t) => (
                           <Link
                             key={t.ticker}
-                            href={`/heatmap/${t.ticker}`}
-                            className="text-[9px] font-mono bg-vortex-accent/10 text-vortex-accent-bright px-1.5 py-0.5 rounded hover:bg-vortex-accent/20 transition-colors"
+                            href={`/ticker/${t.ticker}`}
+                            className="text-[10px] font-mono bg-vortex-accent/10 text-vortex-accent-bright px-1.5 py-0.5 rounded hover:bg-vortex-accent/20 transition-colors"
                           >
                             {t.ticker}
                           </Link>
@@ -253,10 +252,10 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs font-mono text-vortex-text">
+                      <div className="text-sm font-mono text-vortex-text">
                         {w.count} ticker{w.count > 1 ? "s" : ""}
                       </div>
-                      <div className="text-[10px] text-vortex-muted">
+                      <div className="text-xs text-vortex-muted">
                         score: {(w.avgScore * 100).toFixed(0)}
                       </div>
                     </div>
@@ -267,7 +266,7 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
 
             {/* Per-Ticker Breakdown */}
             <div>
-              <div className="text-[10px] text-vortex-muted mb-2 uppercase tracking-wider">
+              <div className="text-xs text-vortex-muted mb-2 uppercase tracking-wider">
                 Per-Ticker Best Windows
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -283,12 +282,12 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
                       className="bg-vortex-surface rounded-lg p-4 border border-vortex-border/50"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-mono font-bold text-sm text-vortex-text-bright">
+                        <span className="font-mono font-bold text-base text-vortex-text-bright">
                           {ticker}
                         </span>
                         <Link
-                          href={`/heatmap/${ticker}`}
-                          className="text-[9px] text-vortex-accent hover:text-vortex-accent-bright"
+                          href={`/ticker/${ticker}`}
+                          className="text-[10px] text-vortex-accent hover:text-vortex-accent-bright"
                         >
                           Full Analysis →
                         </Link>
@@ -303,16 +302,16 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
                                   i === 0 ? "#22c55e" : i === 1 ? "#3b82f6" : "#6b7280",
                               }}
                             />
-                            <span className="text-xs font-mono text-vortex-text">
+                            <span className="text-sm font-mono text-vortex-text">
                               {win.start}-{win.end}
                             </span>
-                            <span className="text-[10px] text-vortex-muted">
+                            <span className="text-xs text-vortex-muted">
                               score {(win.score * 100).toFixed(0)}
                             </span>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-2 text-[9px] text-vortex-muted">
+                      <div className="mt-2 text-[10px] text-vortex-muted">
                         Best session: <span className="text-vortex-accent-bright">{bestPhase.name}</span>
                       </div>
                     </div>
@@ -326,24 +325,24 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
 
       {/* Action Items */}
       <div className="bg-vortex-surface border border-vortex-border rounded-xl p-5">
-        <h2 className="text-xs uppercase tracking-wider text-vortex-accent mb-3">
+        <h2 className="text-sm uppercase tracking-wider text-vortex-accent mb-3">
           Today&apos;s Action Plan
         </h2>
-        <div className="space-y-3 text-xs text-vortex-text">
+        <div className="space-y-3 text-sm text-vortex-text">
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-vortex-accent/10 flex items-center justify-center text-vortex-accent text-[10px] font-bold mt-0.5">
+            <div className="w-6 h-6 rounded-full bg-vortex-accent/10 flex items-center justify-center text-vortex-accent text-xs font-bold mt-0.5">
               1
             </div>
             <div>
               <strong className="text-vortex-text-bright">Pre-Market (8:00-9:30 AM)</strong>
               <p className="text-vortex-muted mt-0.5">
-                Review overnight gaps on VortexEdge. Check gap fill probabilities here for each
+                Review overnight gaps on VortexEdge. Check gap fill probabilities for each
                 gapping stock.
               </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-vortex-accent/10 flex items-center justify-center text-vortex-accent text-[10px] font-bold mt-0.5">
+            <div className="w-6 h-6 rounded-full bg-vortex-accent/10 flex items-center justify-center text-vortex-accent text-xs font-bold mt-0.5">
               2
             </div>
             <div>
@@ -358,7 +357,7 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-vortex-amber/10 flex items-center justify-center text-vortex-amber text-[10px] font-bold mt-0.5">
+            <div className="w-6 h-6 rounded-full bg-vortex-amber/10 flex items-center justify-center text-vortex-amber text-xs font-bold mt-0.5">
               3
             </div>
             <div>
@@ -370,7 +369,7 @@ export default function PlanView({ stocks, regime }: PlanViewProps) {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-vortex-accent/10 flex items-center justify-center text-vortex-accent text-[10px] font-bold mt-0.5">
+            <div className="w-6 h-6 rounded-full bg-vortex-accent/10 flex items-center justify-center text-vortex-accent text-xs font-bold mt-0.5">
               4
             </div>
             <div>

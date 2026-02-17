@@ -20,12 +20,12 @@ export default function StatCard({ label, value, subValue, color = "default", ic
   return (
     <div className="stat-card bg-vortex-card border border-vortex-border rounded-lg p-4">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] uppercase tracking-wider text-vortex-muted">{label}</span>
-        {icon && <span className="text-sm">{icon}</span>}
+        <span className="text-xs uppercase tracking-wider text-vortex-muted">{label}</span>
+        {icon && <span className="text-base">{icon}</span>}
       </div>
       <div className={`text-xl font-bold font-mono ${colorMap[color]}`}>{value}</div>
       {subValue && (
-        <div className="text-[10px] text-vortex-muted mt-0.5">{subValue}</div>
+        <div className="text-xs text-vortex-muted mt-0.5">{subValue}</div>
       )}
     </div>
   );

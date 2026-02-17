@@ -5,11 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "◉" },
-  { href: "/heatmap/SPY", label: "Heatmaps", icon: "▦" },
-  { href: "/gaps/SPY", label: "Gap Fill", icon: "⇥" },
-  { href: "/rhythm/SPY", label: "Rhythm", icon: "◫" },
-  { href: "/calendar", label: "Day Edge", icon: "▤" },
-  { href: "/ib/SPY", label: "IB Stats", icon: "⟛" },
+  { href: "/ticker/SPY", label: "Analysis", icon: "▦" },
   { href: "/plan", label: "My Plan", icon: "☰" },
 ];
 
@@ -28,7 +24,7 @@ export default function Navigation() {
               <span className="text-vortex-text-bright font-semibold text-sm tracking-wide">
                 VortexPulse
               </span>
-              <span className="text-vortex-muted text-[10px] block -mt-0.5 tracking-wider uppercase">
+              <span className="text-vortex-muted text-xs block -mt-0.5 tracking-wider uppercase">
                 Statistical Edge
               </span>
             </div>
@@ -38,19 +34,20 @@ export default function Navigation() {
             {NAV_ITEMS.map((item) => {
               const isActive =
                 pathname === item.href ||
-                (item.href !== "/" && pathname.startsWith(item.href.split("/").slice(0, 2).join("/")));
+                (item.href === "/ticker/SPY" && pathname.startsWith("/ticker/")) ||
+                (item.href !== "/" && item.href !== "/ticker/SPY" && pathname.startsWith(item.href));
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
                     isActive
                       ? "bg-vortex-accent/15 text-vortex-accent-bright"
                       : "text-vortex-muted hover:text-vortex-text hover:bg-vortex-card"
                   }`}
                 >
-                  <span className="text-[11px]">{item.icon}</span>
+                  <span className="text-sm">{item.icon}</span>
                   {item.label}
                 </Link>
               );
@@ -62,7 +59,7 @@ export default function Navigation() {
               href="https://vortexedge.tech"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] text-vortex-muted hover:text-vortex-green transition-colors uppercase tracking-wider"
+              className="text-xs text-vortex-muted hover:text-vortex-green transition-colors uppercase tracking-wider"
             >
               Edge
             </a>
@@ -70,7 +67,7 @@ export default function Navigation() {
               href="https://vortexflow.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] text-vortex-muted hover:text-vortex-cyan transition-colors uppercase tracking-wider"
+              className="text-xs text-vortex-muted hover:text-vortex-cyan transition-colors uppercase tracking-wider"
             >
               Flow
             </a>
@@ -78,7 +75,7 @@ export default function Navigation() {
               href="https://vortexcapitalgroup.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] text-vortex-muted hover:text-vortex-purple transition-colors uppercase tracking-wider"
+              className="text-xs text-vortex-muted hover:text-vortex-purple transition-colors uppercase tracking-wider"
             >
               VCG
             </a>
@@ -91,13 +88,14 @@ export default function Navigation() {
         {NAV_ITEMS.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href.split("/").slice(0, 2).join("/")));
+            (item.href === "/ticker/SPY" && pathname.startsWith("/ticker/")) ||
+            (item.href !== "/" && item.href !== "/ticker/SPY" && pathname.startsWith(item.href));
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`px-2.5 py-1 rounded text-[10px] font-medium whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors ${
                 isActive
                   ? "bg-vortex-accent/15 text-vortex-accent-bright"
                   : "text-vortex-muted"
