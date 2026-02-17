@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "VortexPulse | Intraday Statistical Edge Dashboard",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-vortex-bg antialiased">
         <Navigation />
         <main className="pt-14 md:pt-14">{children}</main>
+        <SpeedInsights />
       </body>
     </html>
   );
