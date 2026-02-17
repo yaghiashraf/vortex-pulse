@@ -421,7 +421,7 @@ export async function getTimeOfDayData(ticker: string): Promise<TimeSlot[]> {
 
     quotes.forEach((q: any) => {
       if (!q.date) return;
-      const timeStr = formatNYTime(q.date);
+      const timeStr = formatNYTime(new Date(q.date));
       const [h, m] = timeStr.split(':').map(Number);
 
       const slotM = m >= 30 ? 30 : 0;
@@ -759,16 +759,17 @@ export async function getIBData(ticker: string): Promise<IBStat> {
     const daysMap = new Map<string, any[]>();
     result.quotes.forEach((q: any) => {
       if (!q.date || q.high == null || q.low == null) return;
-      const timeStr = formatNYTime(q.date);
+      const qDate = new Date(q.date);
+      const timeStr = formatNYTime(qDate);
       if (!isMarketHours(timeStr)) return; // Skip pre/post market
 
-      const dateStr = q.date.toISOString().split('T')[0];
+      const dateStr = qDate.toISOString().split('T')[0];
       if (!daysMap.has(dateStr)) daysMap.set(dateStr, []);
       daysMap.get(dateStr)!.push(q);
     });
 
     daysMap.forEach((quotes) => {
-      quotes.sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
+      quotes.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
       if (quotes.length < 2) return;
 
       // First market-hours candle is the IB (9:30-10:00)

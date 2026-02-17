@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TimeSlot, SessionPhase, DayOfWeekStat, IBStat, StockMeta } from "@/lib/types";
+import { TimeSlot, SessionPhase, IBStat, StockMeta } from "@/lib/types";
 import StatCard from "@/components/StatCard";
 import RecentTickers, { saveRecentTicker } from "@/components/RecentTickers";
 
-type Tab = "heatmap" | "rhythm" | "ib" | "dayedge";
+type Tab = "heatmap" | "rhythm" | "ib";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "heatmap", label: "Heatmap", icon: "▦" },
   { id: "rhythm", label: "Rhythm", icon: "◫" },
   { id: "ib", label: "IB Stats", icon: "⟛" },
-  { id: "dayedge", label: "Day Edge", icon: "▤" },
 ];
 
 interface TickerAnalysisViewProps {
@@ -20,7 +19,6 @@ interface TickerAnalysisViewProps {
   todData: TimeSlot[];
   phases: SessionPhase[];
   ibData: IBStat;
-  dowData: DayOfWeekStat[];
 }
 
 // --- Heatmap helpers ---
@@ -46,7 +44,6 @@ export default function TickerAnalysisView({
   todData,
   phases,
   ibData,
-  dowData,
 }: TickerAnalysisViewProps) {
   const [activeTab, setActiveTab] = useState<Tab>("heatmap");
 
@@ -108,7 +105,6 @@ export default function TickerAnalysisView({
       {activeTab === "heatmap" && <HeatmapTab data={todData} />}
       {activeTab === "rhythm" && <RhythmTab phases={phases} ticker={ticker} />}
       {activeTab === "ib" && <IBTab ib={ibData} stock={stock} ticker={ticker} />}
-      {activeTab === "dayedge" && <DayEdgeTab data={dowData} ticker={ticker} />}
     </div>
   );
 }
@@ -507,129 +503,3 @@ function IBTab({ ib, stock, ticker }: { ib: IBStat; stock: StockMeta | undefined
   );
 }
 
-// ============================================================
-// DAY EDGE TAB
-// ============================================================
-function DayEdgeTab({ data, ticker }: { data: DayOfWeekStat[]; ticker: string }) {
-  if (data.length === 0) {
-    return <div className="text-sm text-vortex-muted">No day-of-week data available.</div>;
-  }
-
-  const bestDay = data.reduce((best, d) => (d.trendProb > best.trendProb ? d : best), data[0]);
-  const worstDay = data.reduce((worst, d) => (d.trendProb < worst.trendProb ? d : worst), data[0]);
-
-  return (
-    <>
-      {/* Visual Day Comparison */}
-      <div className="bg-vortex-card border border-vortex-border rounded-xl p-5 mb-6">
-        <h2 className="text-sm uppercase tracking-wider text-vortex-muted mb-6">Weekly Pattern Overview</h2>
-
-        <div className="grid grid-cols-5 gap-3">
-          {data.map((d) => {
-            const isBest = d.day === bestDay.day;
-            const isWorst = d.day === worstDay.day;
-
-            return (
-              <div key={d.day} className={`rounded-xl p-4 border transition-colors ${isBest ? "bg-vortex-green/10 border-vortex-green/30" : isWorst ? "bg-vortex-red/10 border-vortex-red/30" : "bg-vortex-surface border-vortex-border"}`}>
-                <div className="text-center mb-3">
-                  <div className="text-sm font-semibold text-vortex-text-bright">{d.day}</div>
-                  {isBest && <span className="text-[10px] text-vortex-green uppercase tracking-wider">Best Day</span>}
-                  {isWorst && <span className="text-[10px] text-vortex-red uppercase tracking-wider">Weakest</span>}
-                </div>
-
-                <div className="mb-3">
-                  <div className="text-[10px] text-vortex-muted text-center mb-1">Trend Prob</div>
-                  <div className="w-full bg-vortex-bg rounded-full h-5 relative">
-                    <div className={`h-full rounded-full flex items-center justify-center ${d.trendProb > 0.55 ? "bg-vortex-green/60" : d.trendProb > 0.42 ? "bg-vortex-accent/50" : "bg-vortex-amber/40"}`} style={{ width: `${d.trendProb * 100}%` }}>
-                      <span className="text-[10px] font-mono font-bold text-white">{(d.trendProb * 100).toFixed(0)}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-vortex-muted">Avg Return</span>
-                    <span className={`font-mono font-semibold ${d.avgReturn >= 0 ? "text-vortex-green" : "text-vortex-red"}`}>
-                      {d.avgReturn >= 0 ? "+" : ""}{(d.avgReturn * 100).toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-vortex-muted">Avg Range</span>
-                    <span className="font-mono text-vortex-text">{d.avgRange}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-vortex-muted">Vol</span>
-                    <span className="font-mono text-vortex-text">{d.avgVolume}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-vortex-muted">Gap Freq</span>
-                    <span className="font-mono text-vortex-text">{(d.gapFrequency * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="pt-1 border-t border-vortex-border/50">
-                    <span className="text-vortex-muted">Best Session</span>
-                    <div className="font-semibold text-vortex-accent-bright mt-0.5">{d.bestSession}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Detailed Table */}
-      <div className="bg-vortex-card border border-vortex-border rounded-xl p-5 mb-6">
-        <h2 className="text-sm uppercase tracking-wider text-vortex-muted mb-4">Detailed Day-of-Week Statistics</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-vortex-border">
-                <th className="text-left py-2 text-vortex-muted font-medium">Day</th>
-                <th className="text-right py-2 text-vortex-muted font-medium">Avg Return</th>
-                <th className="text-right py-2 text-vortex-muted font-medium">Avg Range</th>
-                <th className="text-right py-2 text-vortex-muted font-medium">Rel Volume</th>
-                <th className="text-right py-2 text-vortex-muted font-medium">Trend Prob</th>
-                <th className="text-right py-2 text-vortex-muted font-medium">Gap Freq</th>
-                <th className="text-left py-2 text-vortex-muted font-medium pl-4">Best Session</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((d) => (
-                <tr key={d.day} className="border-b border-vortex-border/50 hover:bg-vortex-surface/50">
-                  <td className="py-2.5 font-semibold text-vortex-text-bright">{d.day}</td>
-                  <td className={`py-2.5 text-right font-mono ${d.avgReturn >= 0 ? "text-vortex-green" : "text-vortex-red"}`}>
-                    {d.avgReturn >= 0 ? "+" : ""}{(d.avgReturn * 100).toFixed(2)}%
-                  </td>
-                  <td className="py-2.5 text-right font-mono text-vortex-text">{d.avgRange}%</td>
-                  <td className="py-2.5 text-right font-mono text-vortex-text">{d.avgVolume}%</td>
-                  <td className={`py-2.5 text-right font-mono font-semibold ${d.trendProb > 0.55 ? "text-vortex-green" : d.trendProb > 0.42 ? "text-vortex-accent-bright" : "text-vortex-amber"}`}>
-                    {(d.trendProb * 100).toFixed(0)}%
-                  </td>
-                  <td className="py-2.5 text-right font-mono text-vortex-text">{(d.gapFrequency * 100).toFixed(0)}%</td>
-                  <td className="py-2.5 pl-4 text-vortex-accent-bright">{d.bestSession}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Insights */}
-      <div className="bg-vortex-surface border border-vortex-border rounded-xl p-5">
-        <h2 className="text-sm uppercase tracking-wider text-vortex-accent mb-3">
-          Weekly Edge Insights for {ticker}
-        </h2>
-        <div className="space-y-2 text-sm text-vortex-text leading-relaxed">
-          <p>
-            <strong className="text-vortex-text-bright">{bestDay.day}</strong> shows the highest trend probability at {(bestDay.trendProb * 100).toFixed(0)}%, making it the best day for directional trading strategies.
-          </p>
-          <p>
-            <strong className="text-vortex-text-bright">{worstDay.day}</strong> has the lowest trend probability at {(worstDay.trendProb * 100).toFixed(0)}%. Consider reduced size or mean reversion strategies.
-          </p>
-          <p className="text-vortex-muted">
-            Note: Day-of-week effects are statistical tendencies, not guarantees. Always confirm with real-time data from VortexEdge and VortexFlow before entering positions.
-          </p>
-        </div>
-      </div>
-    </>
-  );
-}

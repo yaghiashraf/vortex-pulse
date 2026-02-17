@@ -3,7 +3,6 @@ import {
   getStockMeta,
   getSessionPhases,
   getIBData,
-  getDayOfWeekData,
 } from "@/lib/real-data";
 import TickerAnalysisView from "@/components/TickerAnalysisView";
 
@@ -14,12 +13,11 @@ export default async function TickerPage({ params }: { params: Promise<{ ticker:
   const upperTicker = ticker.toUpperCase();
 
   // Fetch all data in parallel
-  const [todData, stock, phases, ibData, dowData] = await Promise.all([
+  const [todData, stock, phases, ibData] = await Promise.all([
     getTimeOfDayData(upperTicker),
     getStockMeta(upperTicker),
     getSessionPhases(upperTicker),
     getIBData(upperTicker),
-    getDayOfWeekData(upperTicker),
   ]);
 
   return (
@@ -29,7 +27,6 @@ export default async function TickerPage({ params }: { params: Promise<{ ticker:
       todData={todData}
       phases={phases}
       ibData={ibData}
-      dowData={dowData}
     />
   );
 }
