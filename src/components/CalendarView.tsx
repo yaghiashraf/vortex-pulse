@@ -3,13 +3,20 @@
 import { useRouter } from "next/navigation";
 import { DayOfWeekStat, StockMeta } from "@/lib/types";
 
+interface OptimalWindow {
+  start: string;
+  end: string;
+  score: number;
+}
+
 interface CalendarViewProps {
   stocks: StockMeta[];
   selectedTicker: string;
   data: DayOfWeekStat[];
+  optimalWindows: OptimalWindow[];
 }
 
-export default function CalendarView({ stocks, selectedTicker, data }: CalendarViewProps) {
+export default function CalendarView({ stocks, selectedTicker, data, optimalWindows }: CalendarViewProps) {
   const router = useRouter();
 
   const bestDay = data.length ? data.reduce((best, d) => (d.trendProb > best.trendProb ? d : best), data[0]) : null;
@@ -45,6 +52,53 @@ export default function CalendarView({ stocks, selectedTicker, data }: CalendarV
           </select>
         </div>
       </div>
+
+      {/* Optimal Trading Windows for Today */}
+      {optimalWindows.length > 0 && (
+        <div className="bg-vortex-card border border-vortex-border rounded-xl p-5 mb-6">
+          <h2 className="text-xs uppercase tracking-wider text-vortex-muted mb-4">
+            Top Trading Windows Today — {selectedTicker}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {optimalWindows.map((w, i) => (
+              <div
+                key={i}
+                className={`rounded-lg p-4 border ${
+                  i === 0
+                    ? "bg-vortex-green/10 border-vortex-green/30"
+                    : i === 1
+                    ? "bg-vortex-accent/10 border-vortex-accent/30"
+                    : "bg-vortex-surface border-vortex-border"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-vortex-text-bright">
+                    {w.start} – {w.end}
+                  </span>
+                  <span
+                    className={`text-xs font-mono font-bold ${
+                      i === 0 ? "text-vortex-green" : i === 1 ? "text-vortex-accent-bright" : "text-vortex-muted"
+                    }`}
+                  >
+                    {(w.score * 100).toFixed(0)} score
+                  </span>
+                </div>
+                <div className="w-full bg-vortex-bg rounded-full h-2">
+                  <div
+                    className={`h-full rounded-full ${
+                      i === 0 ? "bg-vortex-green" : i === 1 ? "bg-vortex-accent" : "bg-vortex-muted"
+                    }`}
+                    style={{ width: `${w.score * 100}%` }}
+                  />
+                </div>
+                <div className="text-[9px] text-vortex-muted mt-1">
+                  {i === 0 ? "Best window" : i === 1 ? "2nd best" : "3rd best"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {data.length === 0 ? (
           <div className="text-vortex-muted text-sm">No data available.</div>

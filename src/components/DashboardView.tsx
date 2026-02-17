@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import StatCard from "@/components/StatCard";
-import { useState } from "react";
 import { MarketRegime, StockMeta } from "@/lib/types";
 
 const FEATURES = [
@@ -58,8 +57,6 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({ regime, stocks, optimalWindows, renderedAt }: DashboardViewProps) {
-  const [showAll, setShowAll] = useState(false);
-
   const regimeColor = {
     trending: "green" as const,
     ranging: "amber" as const,
@@ -218,32 +215,6 @@ export default function DashboardView({ regime, stocks, optimalWindows, rendered
               </p>
             </Link>
           ))}
-        </div>
-      </div>
-
-      {/* Popular Stocks Quick Access */}
-      <div className="mb-8">
-        <h2 className="text-sm font-semibold text-vortex-text-bright uppercase tracking-wider mb-4">
-          Popular Stocks
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {(showAll ? stocks : stocks.slice(0, 10)).map((stock) => (
-            <Link
-              key={stock.ticker}
-              href={`/heatmap/${stock.ticker}`}
-              className="bg-vortex-card border border-vortex-border rounded-md px-3 py-1.5 text-xs font-mono hover:border-vortex-accent/40 hover:text-vortex-accent-bright transition-colors"
-            >
-              {stock.ticker}
-            </Link>
-          ))}
-          {!showAll && stocks.length > 10 && (
-            <button
-              onClick={() => setShowAll(true)}
-              className="text-xs text-vortex-accent hover:text-vortex-accent-bright transition-colors px-2"
-            >
-              +{stocks.length - 10} more
-            </button>
-          )}
         </div>
       </div>
 
