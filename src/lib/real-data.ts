@@ -397,7 +397,7 @@ export async function getStockMeta(ticker: string): Promise<StockMeta | undefine
     ]);
     return {
       ticker: q.symbol,
-      name: q.shortName || q.longName || TICKER_NAMES[ticker] || q.symbol,
+      name: TICKER_NAMES[ticker] || q.shortName || q.longName || q.symbol,
       sector: SECTOR_MAP[q.symbol] || "Other",
       avgVolume: q.averageDailyVolume3Month || 0,
       avgATR: parseFloat(atr.toFixed(2)),
