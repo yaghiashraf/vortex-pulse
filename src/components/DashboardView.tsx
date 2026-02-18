@@ -209,7 +209,7 @@ export default function DashboardView({ regime, stocks, indexData, renderedAt }:
             <p className="text-sm text-vortex-muted mb-3">
               Statistical timing intelligence. Know when the edge is in your favor.
             </p>
-            <span className="text-xs text-blue-400 font-mono">vortexpulse.app</span>
+            <span className="text-xs text-blue-400 font-mono">vortexpulse.tech</span>
           </div>
           <a
             href="https://vortexedge.tech"
